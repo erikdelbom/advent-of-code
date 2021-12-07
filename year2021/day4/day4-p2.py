@@ -4,10 +4,10 @@ class Bingo_Board():
     def __init__(self, list):
         self.data = list
         self.bingo_check =  [[0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0],
-                            [0, 0, 0, 0, 0]]
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0]]
         self.turns = 0
         self.winning_number = 0;
 
@@ -76,6 +76,6 @@ bingo_boards.append(Bingo_Board(bingo_board))
 for i in range(len(bingo_boards)):
     bingo_boards[i].count_turns(bingo_numbers)
 
-bingo_boards.sort(key=lambda bingo_board: bingo_board.turns)
+bingo_boards.sort(key=lambda bingo_board: bingo_board.turns, reverse=True)
 
 print(bingo_boards[0].winning_number * bingo_boards[0].sum())
