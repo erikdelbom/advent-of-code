@@ -1,61 +1,85 @@
 import sys
 
-EIGHT = "abcdefg" 
-SEVEN  = "abd" 
-SIX = "bcdefg" 
-FIVE = "bcdef" 
-FOUR = "abef" 
-THREE = "abcdf" 
-TWO = "acdfg" 
-ONE = "ab" 
-ZERO = "abcdeg"
-#len_to_digit = "00174008"
-#decode = { 1 : 0, 4 : 0, 7 : 0, 8 : 0, 0 : 0}
+to_int = { 'a' : 6, 'b' : 5, 'c' : 4, 'd' : 3, 'e' : 2, 'f' : 1, 'g' : 0 } 
 
-def decode(number):
-    if number == ZERO:
-        return int(0)
-    elif number == ONE:
-        return int(1)
-    elif number == TWO:
-        return int(2)
-    elif number == THREE:
-        return int(3)
-    elif number == FOUR:
-        return int(4)
-    elif number == FIVE:
-        return int(5)
-    elif number == SIX:
-        return int(6)
-    elif number == SEVEN:
-        return int(7)
-    else:
-        return int(8)
-    
+def count_bits(number):
+    count = 0
+    for i in bin(number):
+        if i == '1':
+            count += 1
+    return count
 
+def code_to_bin(code):
+    number = 0
+    for i in range(len(code)):
+        number |= (1 << to_int[code[i]])
+
+    return number
+
+def get_number(compare, codes, dif):
+    for c in codes:
+        potential_num = compare ^ c
+        if count_bits(potential_num) == dif:
+            return c
+
+    return -1
+
+def get_decoded_dict(codes):
+    decoded = [0] * 10
+    decoded[8] = 127
+   
+    code_length_five = []
+    code_length_six = []
+
+    for c in codes:
+        if len(c) == 2:
+            decoded[1] = code_to_bin(c)
+        elif len(c) == 3:
+            decoded[7] = code_to_bin(c)
+        elif len(c) == 4:
+            decoded[4] = code_to_bin(c)
+        elif len(c) == 5:
+            code_length_five.append(code_to_bin(c))
+        elif len(c) == 6:
+            code_length_six.append(code_to_bin(c))
+
+    decoded[9] = get_number((decoded[4] | (decoded[1] ^ decoded[7])), code_length_six, 1)
+    code_length_six.remove(decoded[9])
+    decoded[3] = get_number(decoded[1], code_length_five, 3)
+    code_length_five.remove(decoded[3])
+    decoded[2] = get_number(decoded[4], code_length_five, 5)
+    code_length_five.remove(decoded[2])
+    decoded[5] = code_length_five[0]
+    decoded[6] = get_number(decoded[5], code_length_six, 1)
+    code_length_six.remove(decoded[6])
+    decoded[0] = code_length_six[0]
+
+    decoded_dict = { decoded[0] : 0, decoded[1] : 1, decoded[2] : 2, decoded[3] : 3, 
+                    decoded[4] : 4, decoded[5] : 5, decoded[6] : 6, decoded[7] : 7, 
+                    decoded[8] : 8, decoded[9] : 9 }
+
+    return decoded_dict   
 
 sum = 0
 
 for line in sys.stdin:
-    coded = line.split("| ")[1].split()
-    bcd_total = 0
-    for i in range(4):
-        print(coded[i])
-        number = sorted(coded[i])
-        number = "".join(number)
-        print(number)
-        if i == 0:
-            decoded = decode(number)
-            decoded = decoded * 1000
-        elif i == 1:
-            decoded = decode(number) * 100
-        elif i == 2:
-            decoded = decode(number) * 10
-        elif i == 3:
-            decoded = decode(number)
-        bcd_total += decoded
-    print(bcd_total)
-    print()
-    sum += bcd_total
+    codes = line.split(" |")[0].split()
+    outputs = line.split("| ")[1].split()
 
-#print(sum)
+    decoded_dict = get_decoded_dict(codes)
+
+    bcd = 0
+    for i in range(4):
+        coded = code_to_bin(outputs[i])
+        decoded = decoded_dict[coded]
+        if i == 0:
+            bcd += decoded * 1000
+        elif i == 1:
+            bcd += decoded * 100
+        elif i == 2:
+            bcd += decoded * 10
+        else:
+            bcd += decoded
+    sum += bcd
+
+print(sum)
