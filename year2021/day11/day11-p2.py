@@ -56,11 +56,11 @@ def update_neigbours(octos, neighbours):
             octos[n] = -1
             update_neigbours(octos, find_neighbours(octos, n))
 
-total = 0
+steps = 1
 
-for day in range(100):
+while 1:
     flashes = 0
-
+    
     for i in range(len(octos)):
         octos[i] += 1
         if octos[i] > 9:
@@ -74,7 +74,9 @@ for day in range(100):
         if octos[i] == 0 or octos[i] == -1:
             flashes += 1
             octos[i] = 0
+    
+    if flashes == width * height:
+        print(steps)
+        break
 
-    total += flashes
-
-print(total)
+    steps += 1
