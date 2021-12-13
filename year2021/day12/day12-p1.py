@@ -6,26 +6,20 @@ class Node:
         self.visited = False
         self.neighbours = []
         self.parent = ''
-       
-def search(graph, start, end, path):
-    count = 0
-    path.append(start)
-    
-    if start.islower():
-        graph[start].visited = True
+        self.visited_count = 0
 
-    for n in graph[start].neighbours:
-        if n == end:
-            count += 1
-        
+def search(graph, node, counter):
+    if node == 'end':
+        return 1
+    for n in graph[node].neighbours:
+        if n.isupper():
+            counter += search(graph, n, 0)
         elif not graph[n].visited:
-            count += search(graph, n, end, path)
+            graph[n].visited = True
+            counter += search(graph, n, 0)
+            graph[n].visited = False
+    return counter
     
-    latest = path.pop()
-    graph[latest].visited = False
-
-    return count
-
 graph = {}
 
 for line in sys.stdin:
@@ -40,7 +34,8 @@ for line in sys.stdin:
     graph[first_node].neighbours.append(second_node)
     graph[second_node].neighbours.append(first_node)
 
-path = []
-count = search(graph, 'start', 'end', path)
-
-print('Part 1:', count)
+graph['start'].visited = True
+sum = 0
+sum += search(graph, 'start', 0)
+    
+print(sum)

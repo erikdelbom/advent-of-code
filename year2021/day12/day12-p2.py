@@ -7,24 +7,20 @@ class Node:
         self.neighbours = []
         self.parent = ''
         self.visited_count = 0
-
-def print_path(path):
-    for i in range(len(path)):
-        if i == len(path)-1:
-            print(path[i])
-        else:
-            print(path[i], end=' - ')
     
-def search(graph, node, counter):
+def search(graph, node, counter, twice):
     if node == 'end':
         return 1
     for n in graph[node].neighbours:
         if n.isupper():
-            counter += search(graph, n, 0)
+            counter += search(graph, n, 0, twice)
         elif not graph[n].visited:
             graph[n].visited = True
-            counter += search(graph, n, 0)
+            counter += search(graph, n, 0, twice)
             graph[n].visited = False
+        elif twice and n != 'start':
+            counter += search(graph, n, 0, False)
+
     return counter
     
 graph = {}
@@ -42,8 +38,7 @@ for line in sys.stdin:
     graph[second_node].neighbours.append(first_node)
 
 graph['start'].visited = 1
-
 sum = 0
-sum += search(graph, 'start', 0)
+sum += search(graph, 'start', 0, True)
     
 print(sum)
