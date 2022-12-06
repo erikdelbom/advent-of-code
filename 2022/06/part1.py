@@ -10,6 +10,3 @@ for idx, c in enumerate(l):
     if len(s) == n:
         print(idx+n)
         break
-
-
-
