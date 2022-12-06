@@ -9,7 +9,7 @@ for l in stdin:
     left = set(range(left_lower, left_upper+1))
     right = set(range(right_lower, right_upper+1))
 
-    if left.intersection(right) or right.intersection(left):
+    if left.intersection(right):
         sum += 1
 
 print(sum)
