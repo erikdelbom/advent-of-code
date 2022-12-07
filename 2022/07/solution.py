@@ -50,8 +50,7 @@ def build_system(data):
         if cmd == 'cd':
             arg = line[2]
             if arg != '..':
-                dir = cur.add_child(Node(arg, -1, cur))
-                cur = dir
+                cur = cur.add_child(Node(arg, -1, cur))
             elif arg == '..':
                 cur = cur.parent
         elif cmd == 'ls':
