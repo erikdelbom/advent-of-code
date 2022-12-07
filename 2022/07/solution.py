@@ -16,11 +16,6 @@ class Node:
         self.children.append(obj)
         return obj
 
-    def print(self):
-        print('-', self.name, self.size)
-        for child in self.children:
-            child.print()
-
     def get_size(self):
         total = 0
         for child in self.children:
@@ -52,29 +47,26 @@ def build_system(data):
     
     for i in range(1, len(data)):
         line = data[i].split()
-        if line[0] == '$':
-            cmd = line[1]
-            if cmd == 'cd':
-                arg = line[2]
-                if arg != '..':
-                    dir = cur.add_child(Node(arg, -1, cur))
-
-                    cur = dir
-                elif arg == '..':
-                    cur = cur.parent
-            
-            elif cmd == 'ls':
+        cmd = line[1]
+        if cmd == 'cd':
+            arg = line[2]
+            if arg != '..':
+                dir = cur.add_child(Node(arg, -1, cur))
+                cur = dir
+            elif arg == '..':
+                cur = cur.parent
+        elif cmd == 'ls':
+            i += 1
+            for j in range(i, len(data)):
+                if data[i].split()[0] == '$':
+                    break
+                f_info, f_name = data[i].split()
+                if f_info == 'dir':
+                    cur.add_child(Node(f_name, -1, cur))
+                else:
+                    cur.add_child(Node(f_name, int(f_info), cur))
                 i += 1
-                for j in range(i, len(data)):
-                    if data[i].split()[0] == '$':
-                        break
-                    f_info, f_name = data[i].split()
-                    if f_info == 'dir':
-                        cur.add_child(Node(f_name, -1, cur))
-                    else:
-                        cur.add_child(Node(f_name, int(f_info), cur))
-                    i += 1
-                i -= 1
+            i -= 1
 
     return root
 
