@@ -34,7 +34,6 @@ class Node:
         return result
 
     def find_directory(self, n, smallest):
-        result = smallest
         for child in self.children:
             if child.get_size() >= n and child.get_size() < smallest:
                 smallest = child.find_directory(n, child.get_size())
