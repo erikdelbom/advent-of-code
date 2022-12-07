@@ -38,11 +38,11 @@ class Node:
                 result += child.get_size()
         return result
 
-    def find_directories(self, n, smallest):
+    def find_directory(self, n, smallest):
         result = smallest
         for child in self.children:
             if child.get_size() >= n and child.get_size() < smallest:
-                smallest = child.find_directories(n, child.get_size())
+                smallest = child.find_directory(n, child.get_size())
         return smallest
         
 
@@ -82,12 +82,10 @@ def part_1(data):
     system = build_system(data)
     return system.sum_directories(100000)
 
-
 def part_2(data):
     system = build_system(data)
-    space = 70000000 - system.get_size()
-    req = 30000000 - space
-    return system.find_directories(req, system.get_size())
+    req_space = 30000000 - (70000000 - system.get_size())
+    return system.find_directory(req_space, system.get_size())
 
 print("Part 1:", part_1(read_input()))
 print("Part 2:", part_2(read_input()))
