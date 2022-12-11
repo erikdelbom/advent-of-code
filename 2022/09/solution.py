@@ -1,5 +1,12 @@
+from math import sqrt
+
+class Coord:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
 def read_input():
-    with open('test.in', 'r') as f:
+    with open('data.in', 'r') as f:
         lines = list(map(str.rstrip, f.readlines()))
         p = []
         for l in lines:
@@ -8,86 +15,96 @@ def read_input():
             p.append(tmp)
         return p
 
-def part_1(data):
-    locations = {  }
-    h_x = 0
-    h_y = 0
-    t_x = 0
-    t_y = 0
+def euclidean_distance(p1, p2):
+    return sqrt((p2.x-p1.x)**2 + (p2.y-p1.y)**2)
 
-    if data[0][0] == 'U':
-        h_y += 1
-    if data[0][0] == 'R':
-        h_x += 1
-    if data[0][0] == 'D':
-        h_y -= 1
-    if data[0][0] == 'L':
-        h_x -= 1
+def get_direction(p1, p2):
+    if p1.x == p2.x and p1.y < p2.y:
+        return 'N'
+    elif p1.x < p2.x and p1.y < p2.y:
+        return 'NE'
+    elif p1.x < p2.x and p1.y == p2.y:
+        return 'E'
+    elif p1.x < p2.x and p1.y > p2.y:
+        return 'SE'
+    elif p1.x == p2.x and p1.y > p2.y:
+        return 'S'
+    elif p1.x > p2.x and p1.y > p2.y:
+        return 'SW'
+    elif p1.x > p2.x and p1.y == p2.y:
+        return 'W'
+    elif p1.x > p2.x and p1.y < p2.y:
+        return 'NW'
+
+
+def move_knots(knots):
+    for i in range(1, len(knots)):
+        if euclidean_distance(knots[i], knots[i-1]) >= 2:
+            dir = get_direction(knots[i], knots[i-1])
+
+            if dir == 'N':
+                knots[i].y += 1
+            elif dir == 'NE':
+                knots[i].x += 1
+                knots[i].y += 1
+            elif dir == 'E':
+                knots[i].x += 1
+            elif dir == 'SE':
+                knots[i].x += 1
+                knots[i].y -= 1
+            elif dir == 'S':
+                knots[i].y -= 1
+            elif dir == 'SW':
+                knots[i].x -= 1
+                knots[i].y -= 1
+            elif dir == 'W':
+                knots[i].x -= 1
+            elif dir == 'NW':
+                knots[i].x -= 1
+                knots[i].y += 1
+        
+
+
+def move_rope(data, size):
+    locations = {}
+    knots = [Coord(0, 0) for i in range(size)]  
 
     for line in data:
-        print(line)
         dir = line[0]
-        steps = line[1]
+        steps = line[1] 
+
         if dir == 'U':
             for i in range(steps):
-                if h_x == t_x:
-                    h_y += 1
-                    t_y += 1
-                    locations[(t_x, t_y)] = 1 if (t_x, t_y) not in locations else locations[(t_x, t_y)] + 1
-                elif h_y == t_y:
-                    h_y += 1
-                elif h_x != t_x and h_y != t_y:
-                    h_y += 1
-                    t_x = h_x
-                    t_y = h_y - 1
-                    locations[(t_x, t_y)] = 1 if (t_x, t_y) not in locations else locations[(t_x, t_y)] + 1
+                knots[0].y += 1
+                move_knots(knots)
+                locations[(knots[-1].x, knots[-1].y)] = 1
 
         elif dir == 'R':
             for i in range(steps):
-                if h_y == t_y:
-                    h_x += 1
-                    t_x += 1
-                    locations[(t_x, t_y)] = 1 if (t_x, t_y) not in locations else locations[(t_x, t_y)] + 1
-                elif h_x == t_x:
-                    h_x += 1
-                elif h_x != t_x and h_y != t_y:
-                    h_x += 1
-                    t_y = h_y
-                    t_x = h_x - 1
-                    locations[(t_x, t_y)] = 1 if (t_x, t_y) not in locations else locations[(t_x, t_y)] + 1
-        
+                knots[0].x += 1
+                move_knots(knots)
+                locations[(knots[-1].x, knots[-1].y)] = 1
+
         elif dir == 'D':
             for i in range(steps):
-                if h_x == t_x:
-                    h_y -= 1
-                    t_y -= 1
-                    locations[(t_x, t_y)] = 1 if (t_x, t_y) not in locations else locations[(t_x, t_y)] + 1
-                elif h_y == t_y:
-                    h_y -= 1
-                elif h_x != t_x and h_y != t_y:
-                    h_y -= 1
-                    t_x = h_x
-                    t_y = h_y + 1
-                    locations[(t_x, t_y)] = 1 if (t_x, t_y) not in locations else locations[(t_x, t_y)] + 1
-        
+                knots[0].y -= 1
+                move_knots(knots)
+                locations[(knots[-1].x, knots[-1].y)] = 1
+
         elif dir == 'L':
             for i in range(steps):
-                if h_y == t_y:
-                    h_x -= 1
-                    t_x -= 1
-                    locations[(t_x, t_y)] = 1 if (t_x, t_y) not in locations else locations[(t_x, t_y)] + 1
-                elif h_x == t_x:
-                    h_x -= 1
-                elif h_x != t_x and h_y != t_y:
-                    h_x -= 1
-                    t_y = h_y
-                    t_x = h_x + 1
-                    locations[(t_x, t_y)] = 1 if (t_x, t_y) not in locations else locations[(t_x, t_y)] + 1
-        print(t_x, t_y, h_x, h_y)
+                knots[0].x -= 1
+                move_knots(knots)
+                locations[(knots[-1].x, knots[-1].y)] = 1
+
     return len(locations)
-        
+
+def part_1(data):
+    return move_rope(data, 2)
 
 def part_2(data):
-    pass
+    return move_rope(data, 10)
+
+
 print("Part 1:", part_1(read_input()))
 print("Part 2:", part_2(read_input()))
