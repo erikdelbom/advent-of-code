@@ -9,7 +9,7 @@ class Monkey:
         self.count = 0
 
 def read_input():
-    with open('test.in', 'r') as f:
+    with open('data.in', 'r') as f:
         monkeys = []
         m = Monkey()
         for line in list(map(str.strip, f.readlines())):
@@ -62,7 +62,7 @@ def part_1(data):
         for monkey in data:
             monkey.count += len(monkey.items)
             for i in range(len(monkey.items)):
-                item_value = monkey.items[i] % 100
+                item_value = monkey.items[i] 
                 item_value = int(monkey.op(item_value, monkey.op_val) / 3)
                 monkey.items[i] = item_value
                 next = monkey.target[1] if monkey.test(item_value, monkey.test_val) == 0 else monkey.target[0]
@@ -76,13 +76,16 @@ def part_1(data):
 
 
 def part_2(data):
-    for round in range(20):
+    mod = 1
+    for m in data:
+        mod *= m.test_val
+
+    for round in range(10000):
         for monkey in data:
             monkey.count += len(monkey.items)
             for i in range(len(monkey.items)):
                 item_value = monkey.items[i]
-                item_value = monkey.op(item_value, monkey.op_val) % 100
-                monkey.items[i] = item_value
+                item_value = monkey.op(item_value, monkey.op_val) % mod
                 next = monkey.target[1] if monkey.test(item_value, monkey.test_val) == 0 else monkey.target[0]
                 data[next].items.append(item_value)
             monkey.items = []
