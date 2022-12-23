@@ -90,9 +90,4 @@ def part_1(data):
     
     return max_score
 
-            
-
-
-    
-
 print('Part 1:', part_1(read_input()))
