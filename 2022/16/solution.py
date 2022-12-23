@@ -1,106 +1,98 @@
-class Valve:
-    def __init__(self, name, fr) -> None:
-        self.name = name
-        self.flow_rate = fr
-        self.neighbors = []
-        self.open = False
-        self.steps = -1
-
-    def add_neighbour(self, n):
-        self.neighbors.append(n)
-
-    def print(self):
-        print('Name:', self.name)
-        print('Flow rate:', self.flow_rate)
-        print('Open:', self.open)
+from copy import copy
 
 def read_input():
-    valves = {}
-    with open('test.in', 'r') as f:
-        for line in f:
+    valves = []
+    neighbors = {}
+    flow_rate = {}
+
+    with open('data.in', 'r') as f:
+        for line in f.readlines():
             valve_info, neighbor_info = line.split(';')
             name = valve_info.split()[1]
+            valves.append(name)
+            neighbors[name] = []
             fr = int(valve_info.split('=')[1])
-            tmp = Valve(name, fr)
-            neighbors = neighbor_info.split('valve')[1].split()
-            for n in neighbors:
+            flow_rate[name] = fr
+            ns = neighbor_info.split('valve')[1].split()
+            for n in ns:
                 if n != 's':
                     n = n.replace(',', '')
-                    tmp.add_neighbour(n)
-            valves[name] = tmp
-    return valves
+                    neighbors[name].append(n)
+        
+        return (valves, neighbors, flow_rate)
 
-def value(valve, minutes):
-    return valve.flow_rate * (minutes-valve.steps-1)
+def bfs(neighbors, start, goal):
+    if start == goal: 
+        return 0
 
-def steps(valves, start, goal):
-    result = []
     visited = {}
-    parent = { start : None }
-    for key in valves.keys():
+    
+    for key in neighbors.keys():
         visited[key] = False
+    
     q = []
-    q.append(start)
+    q.append((start, 0))
     visited[start] = True
 
     while len(q):
-        cur = q.pop(0)
-        
-        if cur == goal:
-            par = parent[cur]
-            while par != None:
-                result.insert(0, par)
-                par = parent[par]
-            return len(result)
+        cur, steps = q.pop(0)
 
-        for neighbor in valves[cur].neighbors:
+        for neighbor in neighbors[cur]:
+            if neighbor == goal:
+                return steps+1
             if not visited[neighbor]:
-                q.append(neighbor)
+                q.append((neighbor, steps+1))
                 visited[neighbor] = True
-                parent[neighbor] = cur
 
-    return len(result)
+    return -1
 
-def search(valves):
-    cur = 'AA'
-    q = []
+def part_1(data):
+    valves, neighbors, flow_rate = data
+    distance = {}
 
-    for key in valves.keys():
-        valves[key].steps = steps(valves, cur, key)
-        q.append([value(valves[key], 30), valves[key].name])
+    for start in valves:
+        distance[start] = {}
+        for goal in valves:
+            distance[start][goal] = bfs(neighbors, start, goal)
     
-    q.sort(reverse=True)
-    for v in q:
-        #v[0] = steps(valves, cur, v)
-        print(v.name, 'is', v.steps, 'away from AA.', v.flow_rate, '*', 30, '-1 =', v.value(30))
-        print(v)
+    valves_to_open = [valve for valve in valves if flow_rate[valve] > 0]
 
-def part_1(valves):
-    current_valve = valves['AA']
-    search(valves)
-    for minute in range(1, 31, 1):
-        pass
+    max_score = 0
+    time_limit = 30
+    path_stack = []
+    path_stack.append([['AA'], 0, {}])
+
+    while len(path_stack):
+        path, elapsed, opened = path_stack.pop()
+        current_valve = path[-1]
+
+        if elapsed >= time_limit or len(path) == len(valves_to_open)+1:
+            result = 0
+            for valve, time_opened in opened.items():
+                minutes = max(time_limit - time_opened, 0)
+                result += minutes * flow_rate[valve] 
+            
+            max_score = max(result, max_score)
         
-        
-        
-        # # Print minute state
-        # print('== Minute', minute, '==')
-        # print('Valve', end=' ')
-        # for key in valves.keys():
-        #     if valves[key].open:
-        #         print(valves[key].name, end=', ')
-        # print("is open. Releasing", end=' ')
-        # release = 0
-        # for key in valves.keys():
-        #     if valves[key].open:
-        #         release += valves[key].flow_rate
-        # print(release, 'pressure.')
-        # print()
+        else:
+            for next_valve in valves_to_open:
+                if next_valve not in opened.keys():
+                    
+                    time_opened = elapsed + distance[current_valve][next_valve] + 1
+                    
+                    opened_copy = copy(opened)
+                    opened_copy[next_valve] = time_opened
+                    
+                    path_copy = copy(path)
+                    path_copy.append(next_valve)
+
+                    path_stack.append([path_copy, time_opened, opened_copy])
+    
+    return max_score
+
             
 
 
-def part_2(valves):
-    pass
+    
 
 print('Part 1:', part_1(read_input()))
-print('Part 2:', part_2(read_input()))
