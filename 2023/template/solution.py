@@ -5,10 +5,10 @@ def read_input(filename):
         return list(map(str.rstrip, f.readlines()))
 
 
-def part_1(data_list):
+def part_1(data):
     return None
 
-def part_2(data_list):
+def part_2(data):
     return None
 
 input_file = sys.argv[1]

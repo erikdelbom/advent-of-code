@@ -10,11 +10,13 @@ def valid_coord(world, x, y):
 def check_sign(world, x, y):
     return (not world[y][x].isnumeric()) and (world[y][x] != '.')
 
+def check_gear(world, x, y):
+    return world[y][x] == '*'
+
 
 def valid(world, coords):
     valid_bool = False
     for x, y in coords:
-        print(x, y)
         # NORTH
         if valid_coord(world, x, y-1):
             valid_bool = check_sign(world, x, y-1)
@@ -59,8 +61,65 @@ def valid(world, coords):
     
     return valid_bool
 
-         
-            
+def add_gear(gears, coord, num):
+    if coord not in gears.keys():
+        gears[coord] = [num]
+    else:
+        gears[coord].append(num)
+
+def find_gears(gears, world, coords, num):
+    found = False
+    for x, y in coords:
+        # NORTH
+        if valid_coord(world, x, y-1):
+            if check_gear(world, x, y-1):
+                add_gear(gears, (x, y-1), num)
+                found = True
+
+        # NORTH EAST
+        if valid_coord(world, x+1, y-1):
+            if check_gear(world, x+1, y-1):
+                add_gear(gears, (x+1, y-1), num)
+                found = True
+
+        # EAST
+        if valid_coord(world, x+1, y):
+            if check_gear(world, x+1, y):
+                add_gear(gears, (x+1, y), num)
+                found = True
+
+        # SOUTH EAST
+        if valid_coord(world, x+1, y+1):
+            if check_gear(world, x+1, y+1):
+                add_gear(gears, (x+1, y+1), num)
+                found = True
+
+        # SOUTH
+        if valid_coord(world, x, y+1):
+            if check_gear(world, x, y+1):
+                add_gear(gears, (x, y+1), num)
+                found = True
+
+        # SOUTH WEST
+        if valid_coord(world, x-1, y+1):
+            if check_gear(world, x-1, y+1):
+                add_gear(gears, (x-1, y+1), num)
+                found = True
+
+        # WEST
+        if valid_coord(world, x-1, y):
+            if check_gear(world, x-1, y):
+                add_gear(gears, (x-1, y), num)
+                found = True
+
+        # NORTH WEST
+        if valid_coord(world, x-1, y-1):
+            if check_gear(world, x-1, y-1):
+                add_gear(gears, (x-1, y-1), num)      
+                found = True
+
+        if found: 
+            return
 
 
 def part_1(data):
@@ -84,8 +143,10 @@ def part_1(data):
                     sum += int(num)
     return sum
 
-def part_2(data_in):
+
+def part_2(data):
     sum = 0
+    gears = {}
     for y, row in enumerate(data):
         iterator = enumerate(row)
         for x, x_val in iterator:
@@ -101,8 +162,15 @@ def part_2(data_in):
                             x, x_val = next(iterator)
                         else:
                             break
-                if valid(data, coords):
-                    sum += int(num)
+                
+                find_gears(gears, data, coords, int(num))
+
+    print(gears.items())
+    for key, value in gears.items():
+        if len(value) == 2:
+            print(value)
+            sum += value[0] * value[1]
+
     return sum
 
 input_file = sys.argv[1]
