@@ -94,20 +94,7 @@ def move_agent(agent, pipe_map):
 
 
 def count_trapped(loop_map):
-    inside = False
-    count = 0
-    for row in loop_map:
-        for col in row:
-            if inside:
-                if col == '.':
-                    count += 1
-                elif col == 'X':
-                    inside = False
-            elif not inside:
-                if col == 'X':
-                    inside = True
-    
-    return count
+    pass
 
 
 def part_1(data):
