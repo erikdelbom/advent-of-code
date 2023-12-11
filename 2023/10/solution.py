@@ -118,7 +118,7 @@ def part_1(data):
 def part_2(data):
     loop_map = [['.' for x in range(len(data[0]))] for y in range(len(data))]
     start_x, start_y = find_start(data)
-    loop_map[start_y][start_x] = 'X'
+    loop_map[start_y][start_x] = 'S'
     start_directions = find_next_pipes(data, start_x, start_y)
     agents = []
     for dir, sign in start_directions:
