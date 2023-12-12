@@ -15,29 +15,34 @@ def valid(springs, sizes):
     continous = 0
     sizes_idx = 0
     result = []
-    for i in range(springs):
+    for i in range(len(springs)):
         if springs[i] == '#':
-            continuous += 1
+            continous += 1
         if springs[i] != '#':
             continous = 0
-            if continous > sizes_idx:
+            print(continous, sizes[sizes_idx])
+            if continous > sizes[sizes_idx]:
                 return False
+            sizes_idx += 1
     return True
 
 
-def variations(springs, sizes):
+def variations(springs, sizes, result):
+    print(springs)
     if done(springs):
+        result.append(springs)
         return springs
 
     for i in range(len(springs)):
         if springs[i] == '?':
-            springs_copy = springs
-            springs_copy[i] = '#'
+            springs_list = list(springs)
+            springs_list[i] = '#'
+            springs_copy = "".join(springs_list)
             
             if valid(springs_copy, sizes):
-                variations(springs_copy, sizes)
+                return variations(springs_copy, sizes, result)
 
-        
+    return result
 
 
 
@@ -47,7 +52,9 @@ def part_1(data):
     for line in data:
         springs, sizes = line.split()
         sizes = list(map(int, sizes.split(',')))
-        
+        result = []
+        variations(springs, sizes, result)
+        print(result)
 
     return result
 
