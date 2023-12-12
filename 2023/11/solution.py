@@ -29,25 +29,6 @@ def insert_row(image, y, rows):
     for i in range(len(rows)):
         rows[i] += 1
 
-def expand(image, times=1):
-    empty_rows = []
-    for y in range(len(image)):
-        if empty_row(image, y):
-            empty_rows.append(y)
-
-    empty_cols = []
-    for x in range(len(image[0])):
-        if empty_column(image, x):
-            empty_cols.append(x)
-
-    for y in empty_rows:
-        for t in range(times):
-            insert_row(image, y, empty_rows)
-
-    for x in empty_cols:
-        for t in range(times):
-            insert_column(image, x, empty_cols)
-
 def convert(image):
     for i in range(len(image)):
         image[i] = list(image[i])
@@ -70,11 +51,38 @@ def find_galaxies(image):
 def manhattan(start, end):
     return abs(start[0]-end[0]) + abs(start[1]-end[1])
 
+def find_galaxies_fast(image, times):
+    empty_rows = []
+    for y in range(len(image)):
+        if empty_row(image, y):
+            empty_rows.append(y)
+
+    empty_cols = []
+    for x in range(len(image[0])):
+        if empty_column(image, x):
+            empty_cols.append(x)
+
+    galaxies = find_galaxies(image)
+
+    for i in range(len(galaxies)):
+        gal_x, gal_y = galaxies[i]
+        for col in empty_cols:
+            if col < gal_x:
+                galaxies[i][0] += times-1
+        for row in empty_rows:
+            if row < gal_y:
+                galaxies[i][1] += times-1
+
+    new_galaxies = []
+    for galaxy in galaxies:
+        new_galaxies.append((galaxy[0], galaxy[1]))
+
+    return new_galaxies
+
 
 def part_1(data):
     convert(data)
-    expand(data)
-    galaxies = find_galaxies(data)
+    galaxies = find_galaxies_fast(data, 2)
 
     galaxies_dist = {}
 
@@ -96,38 +104,9 @@ def part_1(data):
 
     return sum
 
-
-def find_galaxies_fast(image):
-    empty_rows = []
-    for y in range(len(image)):
-        if empty_row(image, y):
-            empty_rows.append(y)
-
-    empty_cols = []
-    for x in range(len(image[0])):
-        if empty_column(image, x):
-            empty_cols.append(x)
-
-    galaxies = find_galaxies(image)
-
-    for i in range(len(galaxies)):
-        gal_x, gal_y = galaxies[i]
-        for col in empty_cols:
-            if col < gal_x:
-                galaxies[i][0] += 1_000_000-1
-        for row in empty_rows:
-            if row < gal_y:
-                galaxies[i][1] += 1_000_000-1
-
-    new_galaxies = []
-    for galaxy in galaxies:
-        new_galaxies.append((galaxy[0], galaxy[1]))
-
-    return new_galaxies
-
 def part_2(data):
     convert(data)
-    galaxies = find_galaxies_fast(data)
+    galaxies = find_galaxies_fast(data,1_000_000)
 
     galaxies_dist = {}
 
@@ -152,7 +131,7 @@ def part_2(data):
 input_file = sys.argv[1]
 
 start_time = time.time()
-#print("Part 1:", part_1(read_input(input_file)), end=" - ") 
+print("Part 1:", part_1(read_input(input_file)), end=" - ") 
 print(round((time.time() - start_time), 3), "s")
 
 start_time = time.time()
