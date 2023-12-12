@@ -17,15 +17,19 @@ def empty_row(image, y):
             return False
     return True
 
-def insert_column(image, x):
+def insert_column(image, x, cols):
     for y in range(len(image)):
-        image[y].insert(x+1, '.')
+        image[y].insert(x, '.')
+    for i in range(len(cols)):
+        cols[i] += 1
 
-def insert_row(image, y):
-   row = ['.' for i in range(len(image[y]))]
-   image.insert(y+1, row)
+def insert_row(image, y, rows):
+    row = ['.' for i in range(len(image[y]))]
+    image.insert(y, row)
+    for i in range(len(rows)):
+        rows[i] += 1
 
-def expand(image):
+def expand(image, times=1):
     empty_rows = []
     for y in range(len(image)):
         if empty_row(image, y):
@@ -37,10 +41,12 @@ def expand(image):
             empty_cols.append(x)
 
     for y in empty_rows:
-        insert_row(image, y)
+        for t in range(times):
+            insert_row(image, y, empty_rows)
 
     for x in empty_cols:
-        insert_column(image, x)
+        for t in range(times):
+            insert_column(image, x, empty_cols)
 
 def convert(image):
     for i in range(len(image)):
@@ -52,22 +58,101 @@ def print_image(image):
             print(col, end='')
         print()
 
-def 
+
+def find_galaxies(image):
+    result = []
+    for y in range(len(image)):
+        for x in range(len(image[y])):
+            if image[y][x] == '#':
+                result.append([x, y])
+    return result
+
+def manhattan(start, end):
+    return abs(start[0]-end[0]) + abs(start[1]-end[1])
+
 
 def part_1(data):
-    print_image(data)
     convert(data)
     expand(data)
-    print()
-    print_image(data)
+    galaxies = find_galaxies(data)
+
+    galaxies_dist = {}
+
+    for start in galaxies:
+        distances = {}
+        for end in galaxies:
+            if start == end:
+                continue
+            distances[end] = manhattan(start, end)
+        galaxies_dist[start] = distances
+    
+    removed = []
+    sum = 0
+    for key in galaxies_dist.keys():
+        for galaxy in galaxies_dist[key].keys():
+            if galaxy not in removed:
+                sum += galaxies_dist[key][galaxy]
+        removed.append(key)
+
+    return sum
+
+
+def find_galaxies_fast(image):
+    empty_rows = []
+    for y in range(len(image)):
+        if empty_row(image, y):
+            empty_rows.append(y)
+
+    empty_cols = []
+    for x in range(len(image[0])):
+        if empty_column(image, x):
+            empty_cols.append(x)
+
+    galaxies = find_galaxies(image)
+
+    for i in range(len(galaxies)):
+        gal_x, gal_y = galaxies[i]
+        for col in empty_cols:
+            if col < gal_x:
+                galaxies[i][0] += 1_000_000-1
+        for row in empty_rows:
+            if row < gal_y:
+                galaxies[i][1] += 1_000_000-1
+
+    new_galaxies = []
+    for galaxy in galaxies:
+        new_galaxies.append((galaxy[0], galaxy[1]))
+
+    return new_galaxies
 
 def part_2(data):
-    return None
+    convert(data)
+    galaxies = find_galaxies_fast(data)
+
+    galaxies_dist = {}
+
+    for start in galaxies:
+        distances = {}
+        for end in galaxies:
+            if start == end:
+                continue
+            distances[end] = manhattan(start, end)
+        galaxies_dist[start] = distances
+    
+    removed = []
+    sum = 0
+    for key in galaxies_dist.keys():
+        for galaxy in galaxies_dist[key].keys():
+            if galaxy not in removed:
+                sum += galaxies_dist[key][galaxy]
+        removed.append(key)
+
+    return sum
 
 input_file = sys.argv[1]
 
 start_time = time.time()
-print("Part 1:", part_1(read_input(input_file)), end=" - ") 
+#print("Part 1:", part_1(read_input(input_file)), end=" - ") 
 print(round((time.time() - start_time), 3), "s")
 
 start_time = time.time()
