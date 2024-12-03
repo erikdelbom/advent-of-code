@@ -11,8 +11,6 @@ def mul(m):
     a, b = map(int, m.split(','))
     return a * b
 
-
-
 def part_1(data):
     sum = 0
     for line in data:
