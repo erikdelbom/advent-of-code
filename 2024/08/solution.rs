@@ -63,9 +63,9 @@ fn find_matches(antennas: &Vec<Vec<char>>, origin: (usize, usize)) -> Vec<(i32, 
     matches
 }
 
-fn calculate_anti(a: (i32, i32), b: (i32, i32)) -> (i32, i32) {
-    let y = b.0 + (b.0 - a.0);
-    let x = b.1 + (b.1 - a.1);
+fn offset(a: (i32, i32), b: (i32, i32)) -> (i32, i32) {
+    let y = b.0 - a.0;
+    let x = b.1 - a.1;
 
     (y, x)
 }
@@ -74,24 +74,25 @@ fn part_1(data: &Vec<String>) -> i64 {
     let antennas = parse_input(&data);
     let mut anti = vec_same_shape(&antennas);
 
-    let n: i32 = antennas.len() as i32;
-    let m: i32 = antennas[0].len() as i32;
+    let n = antennas.len();
+    let m = antennas[0].len();
   
     for i in 0..n {
         for j in 0..m {
-            let c = antennas[i as usize][j as usize];
+            let c = antennas[i][j];
             if !(c.is_numeric() || c.is_alphabetic()) {
                 continue
             }
             
-            let matches = find_matches(&antennas, (i as usize, j as usize));
-            for mat in matches {
-                let (y,x) = calculate_anti((i,j), (mat.0,mat.1));
-                if y < n && y >= 0 && x < m && x >= 0 {
+            let matches = find_matches(&antennas, (i, j));
+            for ma in matches {
+                let (dy, dx) = offset((i as i32, j as i32), (ma.0,ma.1));
+                let y = ma.0+dy;
+                let x = ma.1+dx;
+                if y < (n as i32) && y >= 0 && x < (m as i32) && x >= 0 {
                     anti[y as usize][x as usize] = 1;
                 }
             }
-                
         }
     } 
     
@@ -102,7 +103,38 @@ fn part_1(data: &Vec<String>) -> i64 {
 }
 
 fn part_2(data: &Vec<String>) -> i64 {
-    2
+    let antennas = parse_input(&data);
+    let mut anti = vec_same_shape(&antennas);
+
+    let n = antennas.len();
+    let m = antennas[0].len();
+    
+    for i in 0..n {
+        for j in 0..m {
+            let c = antennas[i as usize][j as usize];
+            if !(c.is_numeric() || c.is_alphabetic()) {
+                continue
+            }
+            anti[i as usize][j as usize] = 1; 
+            let matches = find_matches(&antennas, (i, j));
+            for (y, x) in matches {
+                let (dy,dx) = offset((i as i32, j as i32), (y,x));
+                let mut y = y+dy;
+                let mut x = x+dx;
+                while y < (n as i32) && y >= 0 && x < (m as i32) && x >= 0 {
+                    anti[y as usize][x as usize] = 1;
+                    y += dy;
+                    x += dx;
+                }
+            }
+        }
+    } 
+    
+    anti.iter()
+        .flat_map(|row| row.iter())
+        .map(|&x| x as i64)
+        .sum()
+
 }
 
 fn main() {
