@@ -59,29 +59,80 @@ fn format_disk(disk: &mut Vec<i64>) {
 
     while front < back {
         let f = disk[front];
-        println!("Front: {} {}, Back: {} {}", front, disk[front], back, disk[back]);
+        let mut done = false;
         if f == -1 {
             let mut b = disk[back];
             while b == -1 {
                 back -= 1;
                 b = disk[back];
+                if back <= front {
+                    done = true;
+                    break;
+                }
             }
-            disk.swap(front, back);
-            back -= 1;
+            if !done {
+                disk.swap(front, back);
+                back -= 1;
+            }
         }
         front += 1;
     }
 }
 
+fn get_len(disk: &Vec<i64>, mut i: usize) -> i64 {
+    if disk[i] == -1 {
+        let mut len: i64 = 0;
+        while disk[i] == -1 {
+            len += 1;
+            i += 1;
+        }
+        len
+    } else {
+        let mut len: i64 = 0;
+        while disk[i] != -1 && i > 0 {
+            len += 1;
+            i -= 1;
+        }
+        len
+    } 
+}
+
+fn move_file(disk: &mut Vec<i64>, mut i: usize, mut j: usize, len: i64) {
+    for _ in 0..len {
+        disk.swap(i, j);
+        i -= 1;
+        j += 1;
+    } 
+} 
+
+fn format_disk_filewise(disk: &mut Vec<i64>) {
+    for i in (0..disk.len()-1).rev() {
+        let f = disk[i];
+        if f != -1 {
+            let flen = get_len(&disk, i);
+            for j in 0..(f-flen) {
+                let g = disk[j as usize];
+                if g == -1 {
+                    let glen = get_len(&disk, i);
+                    println!("{f} {flen} {glen}");
+                    if flen <= glen {
+                        move_file(disk, i, j as usize, flen);
+                    }
+                }
+            }
+        }
+    }
+}
+
 fn checksum(disk: &Vec<i64>) -> u64{
     let mut sum = 0;
-    let mut i = 0;
-    let mut f = disk[i];
+    let mut f;
 
-    while f != -1 {
-        sum += (i as u64) * (f as u64);
-        i += 1;
+    for i in 0..disk.len() {
         f = disk[i];
+        if f != -1 {
+            sum += (i as u64) * (f as u64);
+        }
     }
     sum
 }
@@ -89,14 +140,16 @@ fn checksum(disk: &Vec<i64>) -> u64{
 fn part_1(data: &Vec<String>) -> u64 {
     let parsed_data = parse_input(&data);
     let mut disk = create_disk(&parsed_data);
-    //println!("{:?}", disk);
     format_disk(&mut disk);
-    println!("{:?}", &disk[50000..50010]);
     checksum(&disk)
 }
 
 fn part_2(data: &Vec<String>) -> u64 {
-    2
+    let parsed_data = parse_input(&data);
+    let mut disk = create_disk(&parsed_data);
+    format_disk_filewise(&mut disk);
+    println!("{:?}", disk);
+    checksum(&disk)
 }
 
 fn main() {
