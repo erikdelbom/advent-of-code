@@ -80,16 +80,16 @@ fn format_disk(disk: &mut Vec<i64>) {
 }
 
 fn get_len(disk: &Vec<i64>, mut i: usize) -> i64 {
+    let mut len: i64 = 0;
+    let file = disk[i];
     if disk[i] == -1 {
-        let mut len: i64 = 0;
         while disk[i] == -1 {
             len += 1;
             i += 1;
         }
         len
     } else {
-        let mut len: i64 = 0;
-        while disk[i] != -1 && i > 0 {
+        while disk[i] != -1 && disk[i] == file && i > 0  {
             len += 1;
             i -= 1;
         }
@@ -106,20 +106,24 @@ fn move_file(disk: &mut Vec<i64>, mut i: usize, mut j: usize, len: i64) {
 } 
 
 fn format_disk_filewise(disk: &mut Vec<i64>) {
-    for i in (0..disk.len()-1).rev() {
+    let mut i = disk.len()-1;
+    while i > 0 {
         let f = disk[i];
         if f != -1 {
             let flen = get_len(&disk, i);
-            for j in 0..(f-flen) {
-                let g = disk[j as usize];
+            for j in 0..(i-flen as usize) {
+                let g = disk[j];
                 if g == -1 {
-                    let glen = get_len(&disk, i);
-                    println!("{f} {flen} {glen}");
+                    let glen = get_len(&disk, j);
                     if flen <= glen {
-                        move_file(disk, i, j as usize, flen);
+                        move_file(disk, i, j, flen);
+                        break;
                     }
                 }
             }
+            i -= flen as usize;
+        } else {
+            i -= 1;
         }
     }
 }
@@ -148,7 +152,6 @@ fn part_2(data: &Vec<String>) -> u64 {
     let parsed_data = parse_input(&data);
     let mut disk = create_disk(&parsed_data);
     format_disk_filewise(&mut disk);
-    println!("{:?}", disk);
     checksum(&disk)
 }
 
