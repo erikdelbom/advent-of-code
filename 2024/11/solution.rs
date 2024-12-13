@@ -36,20 +36,28 @@ fn parse_input(data: &Vec<String>) -> Vec<u64> {
 
 fn part_1(data: &Vec<String>) -> u64 {
     let mut stones = parse_input(&data);
-    println!("{:?}", stones);
 
-    for blink in 0..6 {
-        for i in range 0..stones.len() {
+    for blink in 0..25 {
+        let mut i = 0;
+        while i < stones.len() {
             let stone = stones[i];
+            let stone_str = stone.to_string();
+            let stone_len = stone_str.len();
             if stone == 0 {
                 stones[i] = 1;
+            } else if  stone_len % 2 == 0 {
+                let first_half = &stone_str[0..stone_len/2];
+                let second_half = &stone_str[stone_len/2..stone_len];
+                stones[i] = first_half.parse::<u64>().unwrap();
+                stones.insert(i+1, second_half.parse::<u64>().unwrap());
+                i += 1;
+            } else {
+                stones[i] = stone * 2024;
             }
-            else if ((stone.abs() as f64).log10().floor() as u32 + 1) % 2 == 0 {
-
-            }
+            i += 1;
         }
     }
-    2 
+    stones.len() as u64
 }
 
 fn part_2(data: &Vec<String>) -> u64 {
