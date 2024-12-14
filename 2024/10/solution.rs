@@ -82,12 +82,10 @@ fn find_trails(map: &Vec<Vec<i64>>, head: (usize, usize), distinct: bool) -> i64
     while !queue.is_empty() {
         let current = queue.pop_front().unwrap();
         visited[current.0][current.1] = 1;
-        //println!("{:?}", current);
         if map[current.0][current.1] == 9 {
             count += 1;
         } else {
             let neighbors = find_neighbors(map, current);
-            //println!("{:?}", neighbors);
             for n in neighbors {
                 let diff = (map[n.0][n.1] - map[current.0][current.1]);
                 if visited[n.0][n.1] == 0 && diff == 1 {
@@ -100,7 +98,6 @@ fn find_trails(map: &Vec<Vec<i64>>, head: (usize, usize), distinct: bool) -> i64
             }
         }
     }
-    //println!("{count}");
     count
 }
 
