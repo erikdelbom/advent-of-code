@@ -92,6 +92,42 @@ fn find_area(map: &Vec<Vec<char>>, visited: &mut Vec<Vec<i32>>, start: Coord) ->
     (area, per)
 }
 
+
+fn find_sides(map: &Vec<Vec<char>>, start: Coord) -> i64 {
+    let NORTH = 0;
+    let EAST = 1;
+    let SOUTH = 2;
+    let WEST = 3;
+    let offset: Vec<(i32, i32)> = vec![(-1, 0), (1, 0), (0, 1), (0, -1)];
+    let mut dir = EAST;
+    let (mut y, mut x) = (start.0 as i32, start.1 as i32);
+    let mut sides = 1;
+    let area_code = map[y as usize][x as usize];
+    let mut prev_dir = dir;
+
+    while dir != NORTH && (y as usize, x as usize) != start {
+        let mut next_found = false; 
+        while !next_found {
+            let (off_y, off_x) = offset[dir as usize];
+            if y+off_y >= 0 && y+off_y < map.len() as i32 &&
+               x+off_x >= 0 && x+off_x < map[0].len() as i32 {
+                let mut neighbor = map[(y+off_y) as usize][(x+off_x) as usize];   
+                if neighbor == area_code {
+                    println!("found neighbor");
+                    (y, x) = (y+off_y, x+off_x);
+                    next_found = true;
+                    if dir != prev_dir {
+                        sides += 1;
+                    }
+                    continue;
+                }
+            } 
+            dir = (dir + 1) % 4;
+        }
+    }
+    sides + 1
+}
+
 fn part_1(data: &Vec<String>) -> i64 {
     let mut sum = 0;
     let map = parse_input(&data);
@@ -99,15 +135,27 @@ fn part_1(data: &Vec<String>) -> i64 {
     for i in 0..map.len() {
         for j in 0..map[0].len() {
             let (area, per) = find_area(&map, &mut visited, (i, j));
-            //println!("{} {} {}", map[i][j], area, per);
             sum += area * per;
         }
     }
     sum
 }
 
-fn part_2(_data: &Vec<String>) -> i64 {
-    2
+fn part_2(data: &Vec<String>) -> i64 {
+    let mut sum = 0;
+    let map = parse_input(&data);
+    let mut visited = vec![vec![0; map[0].len()]; map.len()];
+    for i in 0..map.len() {
+        for j in 0..map[0].len() {
+            let (area, _) = find_area(&map, &mut visited, (i, j));
+            if area > 0 {
+                let sides = find_sides(&map, (i, j));
+                sum += area * sides;
+                println!("{sides}");
+            }
+        }
+    }
+    sum
 }
 
 fn main() {

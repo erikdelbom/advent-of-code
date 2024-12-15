@@ -61,6 +61,14 @@ fn part_1(data: &Vec<String>) -> u64 {
 }
 
 fn part_2(data: &Vec<String>) -> u64 {
+    let mut stones = parse_input(&data);
+    let stone_types = vec![vec![]; ];
+
+    for blink in 0..25{
+        for type in stone_types {
+
+        }
+    }
     2
 }
 
