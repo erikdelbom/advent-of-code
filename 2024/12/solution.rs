@@ -97,32 +97,86 @@ fn find_area(map: &Vec<Vec<char>>, visited: &mut Vec<Vec<i32>>, start: Coord) ->
     (area, per, border)
 }
 
-fn find_sides(map: &Vec<Vec<char>>, start: Coord) -> i64 {
-    let offsets: Vec<(i32, i32)> = vec![(0,  1), ( 1,  1), ( 1, 0), ( 1, -1), 
-                                        (0, -1), (-1, -1), (-1, 0), (-1,  1)];
-    
-    let mut sides = 0;
-    let mut current = start;
-    let area_code = map[start.0][start.1];
-    let mut dir = 0;
+fn find_sides(map: &Vec<Vec<char>>, border: &Vec<Coord>) -> i64 {
+    let ymin = border.iter().map(|a| a.0).min().unwrap(); 
+    let ymax = border.iter().map(|a| a.0).max().unwrap(); 
+    let xmin = border.iter().map(|a| a.1).min().unwrap(); 
+    let xmax = border.iter().map(|a| a.1).max().unwrap();
 
-    while true {
-        println!("{:?}", current);
-        for i in 0..8 {
-            let n = (current.0 as i32 + offsets[i].0, current.1 as i32 + offsets[i].1);            
-            if n.0 < map.len() as i32 && n.0 >= 0 && n.1 < map[0].len() as i32 && n.1 >= 0 {
-                if map[n.0 as usize][n.1 as usize] == area_code {
-                    current = (n.0 as usize, n.1 as usize);
-                    if i != dir {
+    let area_code = map[border[0].0][border[0].1];
+    let mut sides = 0;
+
+    let mut active = false;
+    for i in ymin..ymax+1 {
+        active = false;
+        for j in xmin..xmax+1 {
+            let c = map[i][j];
+            if c == area_code {
+                if (i == 0 || map[i-1][j] != area_code) && !active {
+                    if border.contains(&(i,j)) {
                         sides += 1;
+                        active = true;
                     }
-                    break;
+                } else if i > 0 && map[i-1][j] == area_code {
+                    active = false;
                 }
-            }
+            } else {
+                active = false;
+            }              
         }
-        if current == start && sides > 1 {
-            sides += 1;
-            break;
+    }
+    for i in ymin..ymax+1 {
+        active = false;
+        for j in xmin..xmax+1 {
+            let c = map[i][j];
+            if c == area_code {
+                if (i == map.len()-1 || map[i+1][j] != area_code) && !active {
+                    if border.contains(&(i,j)) {
+                        sides += 1;
+                        active = true;
+                    }
+                }  else if i < map.len()-1 && map[i+1][j] == area_code {
+                    active = false;
+                }
+            } else {
+                active = false;
+            }              
+        }
+    }
+    for j in xmin..xmax+1 {
+        active = false;
+        for i in ymin..ymax+1 {
+            let c = map[i][j];
+            if c == area_code {
+                if (j == 0 || map[i][j-1] != area_code) && !active {
+                    if border.contains(&(i,j)) {
+                        sides += 1;
+                        active = true;
+                    }
+                } else if j > 0 && map[i][j-1] == area_code {
+                    active = false;
+                }
+            } else {
+                active = false;
+            }              
+        }
+    }
+    for j in xmin..xmax+1 {
+        active = false;
+        for i in ymin..ymax+1 {
+            let c = map[i][j];
+            if c == area_code {
+                if (j == map.len()-1 || map[i][j+1] != area_code) && !active {
+                    if border.contains(&(i,j)) {
+                        sides += 1;
+                        active = true;
+                    }
+                } else if j < map[0].len()-1 && map[i][j+1] == area_code {
+                    active = false;
+                }
+            } else {
+                active = false;
+            }              
         }
     }
     sides
@@ -149,7 +203,7 @@ fn part_2(data: &Vec<String>) -> i64 {
         for j in 0..map[0].len() {
             let (area, _, border) = find_area(&map, &mut visited, (i, j));
             if area > 0 {
-                let sides = find_sides(&map, (i, j));
+                let sides = find_sides(&map, &border);
                 sum += area * sides;
             }
         }
