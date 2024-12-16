@@ -2,6 +2,7 @@ use std::env;
 use std::process;
 use std::fs::read_to_string;
 use std::time::Instant;
+use regex::Regex;
 
 fn get_filename() -> String {
     match env::args().nth(1) {
@@ -38,8 +39,11 @@ fn gcd(mut a: u64, mut b: u64) -> u64 {
 }
 
 fn part_1(data: &Vec<String>) -> i64 {
-    let a = gcd(94, 22);
-    println!("{a}");
+    let rex = Regex::new(r"X\+[0-9]+").unwrap();
+    for line in data {
+        let Some(s) = rex.captures(line);
+        println!("{s}");
+    }
     1
 }
 
