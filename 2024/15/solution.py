@@ -2,6 +2,7 @@ import sys
 import time
 
 offsets = {'^': (-1, 0), 'v': (1, 0), '<': (0, -1), '>': (0, 1)}
+lookaheads = {'^': 0, 'v': 0, '<': -2, '>': 2}
 
 def read_input(filename):
     with open(filename, 'r') as f:
@@ -70,25 +71,99 @@ def move_boxes(world, pos, move):
 
     return False
 
+def move_box(world, pos, move):
+    if move == '<':
+        world[pos[0]][pos[1]] = '.'
+        world[pos[0]][pos[1]-1] = ']'
+        world[pos[0]][pos[1]-2] = '['
+    elif move == '>':
+        world[pos[0]][pos[1]] = '.'
+        world[pos[0]][pos[1]+1] = '['
+        world[pos[0]][pos[1]+2] = ']'
+    elif move == '^':
+        world[pos[0]][pos[1]] = '.'
+        world[pos[0]-1][pos[1]] = '['
+        world[pos[0]][pos[1]+1] = '.'
+        world[pos[0]-1][pos[1]+1] = ']'
+    elif move == 'v':
+        world[pos[0]][pos[1]] = '.'
+        world[pos[0]+1][pos[1]] = '['
+        world[pos[0]][pos[1]+1] = '.'
+        world[pos[0]+1][pos[1]+1] = ']'
+
 def move_wide_boxes(world, pos, move):
-    offy, offx = offsets[move]
-    newy, newx = pos[0]+offy, pos[1]+offx
-    trace = []
-
-    while world[newy][newx] != '#':
-        if world[newy][newx] == 'O':
-            trace.append((newy, newx))
-            newy, newx = newy+offy, newx+offx
+    if move == '<': 
+        newy, newx = pos[0], pos[1]-2
+        if world[newy][newx] == ']':
+            if move_wide_boxes(world, (newy, newx), move):
+                move_box(world, pos, move)
+                return True
+            else:
+                return False
         elif world[newy][newx] == '.':
-            pos = '.'
-            trace.append((newy, newx))
-            for t in trace:
-                world[t[0]][t[1]] = 'O'
-            
+            move_box(world, pos, move)
             return True
+        else:
+            return False
 
-    return False
+    elif move == '>':
+        newy, newx = pos[0], pos[1]+2
+        if world[newy][newx] == '[':
+            if move_wide_boxes(world, (newy, newx), move):
+                move_box(world, pos, move)
+                return True
+            else:
+                return False
+        elif world[newy][newx] == '.':
+            move_box(world, pos, move)
+            return True
+        else:
+            return False       
 
+    elif move == '^':
+        left = False
+        right = False
+        y,x = pos
+        if world[y][x] == ']':
+            x = x-1
+        
+        if world[y-1][x] == ']':
+            if move_wide_boxes(world, (y-1, x), move):
+                move_box(world, (y, x), move)
+                left = True 
+            else:
+                left = False
+        elif world[y-1][x] == '[':
+             if move_wide_boxes(world, (y-1, x), move):
+                move_box(world, (y, x), move)
+                left = True
+                right = True
+             else:
+                left = False
+                right = False
+        
+        print(left)
+        if world[y-1][x+1] == '[' and left:
+            if move_wide_boxes(world, (y-1,x+1), move):
+                print("move")
+                move_box(world, (y, x), move)
+                return True
+            else:
+                return False
+                                
+        if world[y-1][x] == '.':
+            move_box(world, (y, x), move)
+            return True
+        else:
+            return False
+
+
+    elif move == 'v':
+        y,x = pos
+        if world[y][x] == ']':
+            x = x-1
+        
+        
 
 def move(world, pos, move):
     offy,offx = offsets[move] 
@@ -99,6 +174,26 @@ def move(world, pos, move):
     
     elif world[newy][newx] == 'O':
         if move_boxes(world, (newy, newx), move):
+            world[pos[0]][pos[1]] = '.'
+            world[newy][newx] = '@'
+            return newy, newx
+        else:
+            return pos
+        
+    elif world[newy][newx] == '.':
+        world[pos[0]][pos[1]] = '.'
+        world[newy][newx] = '@'
+        return newy, newx
+
+def wide_move(world, pos, move):
+    offy,offx = offsets[move] 
+    newy, newx = pos[0]+offy, pos[1]+offx
+    
+    if world[newy][newx] == '#':
+        return pos
+    
+    elif world[newy][newx] == '[' or world[newy][newx] == ']':
+        if move_wide_boxes(world, (newy, newx), move):
             world[pos[0]][pos[1]] = '.'
             world[newy][newx] = '@'
             return newy, newx
@@ -138,7 +233,10 @@ def part_2(data):
     world = create_wide_world(data)
     moves = get_moves(data)
     pos = get_start(world)
-    
+    for m in moves:
+        print_world(world)
+        pos = wide_move(world, pos, m)
+
 input_file = sys.argv[1]
 
 start_time = time.time()
