@@ -30,15 +30,15 @@ def solve_system(ax, bx, cx, ay, by, cy):
     ax1 = bx // gcd1
     bx1 = -ax // gcd1
 
-    a2_new = ay * ax1 + by * bx1
-    c2_new = cy - ay * x1 - by * y1
+    y_new = ay * ax1 + by * bx1
+    cy_new = cy - ay * x1 - by * y1
 
-    t0 = c2_new // a2_new
-    if c2_new % a2_new != 0:
+    t = cy_new // y_new
+    if cy_new % y_new != 0:
         return 0, 0
 
-    x = x1 + t0 * ax1
-    y = y1 + t0 * bx1
+    x = x1 + t * ax1
+    y = y1 + t * bx1
 
     return x, y
 
