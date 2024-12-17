@@ -1,7 +1,6 @@
 import sys
 import time
 import re
-import math
 
 def read_input(filename):
     with open(filename, 'r') as f:
@@ -24,21 +23,21 @@ def solve_diophantine(a, b, c):
 
 
 def solve_system(ax, bx, cx, ay, by, cy):
-    x1, y1, gcd1 = solve_diophantine(ax, bx, cx)
+    x1, x2, gcdx = solve_diophantine(ax, bx, cx)
     if x1 is None:
         return 0, 0
-    ax1 = bx // gcd1
-    bx1 = -ax // gcd1
+    ax1 = bx // gcdx
+    bx1 = -ax // gcdx
 
     y_new = ay * ax1 + by * bx1
-    cy_new = cy - ay * x1 - by * y1
+    cy_new = cy - ay * x1 - by * x2
 
     t = cy_new // y_new
     if cy_new % y_new != 0:
         return 0, 0
 
     x = x1 + t * ax1
-    y = y1 + t * bx1
+    y = x2 + t * bx1
 
     return x, y
 
